@@ -17,9 +17,9 @@ def send_mail(sender: str, body: str):
         email = st.secrets['email']
         password = st.secrets['password']
         target = st.secrets['target']
-    st.write(email)
+    
     cls()
-
+    st.write(email)
     with placeholder.progress(0):
         time.sleep(1)
         conn = smtplib.SMTP('smtp.gmail.com', 587)
