@@ -17,7 +17,7 @@ def send_mail(sender: str, body: str):
         email = st.secrets['email']
         password = st.secrets['password']
         target = st.secrets['target']
-
+    st.write(email)
     cls()
 
     with placeholder.progress(0):
