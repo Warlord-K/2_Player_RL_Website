@@ -1,5 +1,5 @@
 import streamlit as st
-from src import home, about, mail, tic_tac_toe
+from src import home, about, mail, tic_tac_toe, connect4
 
 
 def init():
@@ -12,6 +12,7 @@ def init():
         'About me': about.main,
         'Message me': mail.main,
         'Tic Tac Toe': tic_tac_toe.main,
+        'Connect 4': connect4.main
     }
 
 
@@ -76,7 +77,7 @@ def main():
         if st.session_state.project and st.session_state.game:
             st.selectbox(
                 'Games',
-                ['Tic Tac Toe'],
+                ['Tic Tac Toe','Connect 4'],
                 key='set',
                 on_change=set_page,
             )
