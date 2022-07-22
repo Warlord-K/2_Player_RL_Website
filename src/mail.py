@@ -19,7 +19,6 @@ def send_mail(sender: str, body: str):
         target = st.secrets['target']
     
     cls()
-    st.write(email)
     with placeholder.progress(0):
         time.sleep(1)
         conn = smtplib.SMTP('smtp.gmail.com', 587)
