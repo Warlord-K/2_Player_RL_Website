@@ -276,7 +276,7 @@ def init(post_init=False):
         st.session_state.Agent = DQNAgent(state_size=42,action_size=7,seed=0)
         try:
             path = os.path.realpath(__file__)[:-12]
-            st.session_state.Agent.qnetwork_local.load_state_dict(torch.load(f'{path}/q_dict2.pt'))
+            st.session_state.Agent.qnetwork_local.load_state_dict(torch.load(f'{path}/q_dict2.pt',map_location=torch.device('cpu')))
         except FileNotFoundError as e:
             st.write(e)
     st.session_state.env.reset()
