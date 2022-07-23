@@ -1,7 +1,7 @@
 import streamlit as st
 import numpy as np
 import joblib
-
+import os
 class Agent():
   def __init__(self,epsilon = 0.1,alpha = 0.1,gamma = 0.9):
     #self.state_memory = np.zeros(mem_length)
@@ -84,7 +84,8 @@ def check_win(board):
 def load_agent():
     agent = Agent(epsilon=0.1)
     try:
-        Q2 = joblib.load('q_table2.pkl')
+        path = os.path.realpath(__file__)[:-15]
+        Q2 = joblib.load(f'{path}/q_table2.pkl')
         agent.Q = Q2
     except:
         pass
