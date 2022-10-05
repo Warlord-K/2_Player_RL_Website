@@ -7,6 +7,9 @@ import torch.nn.functional as F
 from collections import namedtuple, deque 
 import streamlit as st
 import os
+import neat
+import random
+import pickle
 class Connect4():
     def __init__(self, board_size = (6,7)):
         self.board_size = board_size
@@ -47,7 +50,9 @@ class Connect4():
             reward = -10
             return self.encoded_state(self.board),reward,self.done,self.winner
         
-
+    def neat_step(self,col):
+        next_state,reward,done,winner = self.step(col)
+        return reward
     def is_valid_location(self,col):
         #if this condition is true we will let the use drop self.turn here.
         #if not true that means the col is not vacant
@@ -268,17 +273,35 @@ class ReplayBuffer:
         """Return the current size of internal memory."""
         return len(self.memory)
 
+
+
+
+
 def init(post_init=False):
     if not post_init:
         st.session_state.opponent = 'Computer'
         st.session_state.win = {'Red': 0, 'Blue': 0}
         st.session_state.env = Connect4()
-        st.session_state.Agent = DQNAgent(state_size=42,action_size=7,seed=0)
+        local_dir = os.path.dirname(__file__)
+        config_path = os.path.join(local_dir, 'config.txt')
+
+        config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
+                            neat.DefaultSpeciesSet, neat.DefaultStagnation,
+                            config_path)
+        # st.session_state.Agent = DQNAgent(state_size=42,action_size=7,seed=0)
+        # try:
+        #     path = os.path.realpath(__file__)[:-12]
+        #     st.session_state.Agent.qnetwork_local.load_state_dict(torch.load(f'{path}/q_dict2.pt',map_location=torch.device('cpu')))
+        # except FileNotFoundError as e:
+        #     st.write(e)
         try:
             path = os.path.realpath(__file__)[:-12]
-            st.session_state.Agent.qnetwork_local.load_state_dict(torch.load(f'{path}/q_dict2.pt',map_location=torch.device('cpu')))
+            with open(f"{path}/best.pickle", "rb") as f:
+                winner = pickle.load(f)
+            st.session_state.winner_net = neat.nn.FeedForwardNetwork.create(winner, config)
         except FileNotFoundError as e:
             st.write(e)
+
     st.session_state.env.reset()
     st.session_state.state = 0
     st.session_state.player = 'Red'
@@ -302,9 +325,20 @@ def check_state():
 
 def computer_player():
     if not st.session_state.env.done:
-        action = st.session_state.Agent.take_action(st.session_state.env.encoded_state(st.session_state.env.board),0.1)
+        action = AI_input()
         handle_click(0,action)
 
+def AI_input():
+        while True:
+            output = st.session_state.winner_net.activate(st.session_state.env.board.flatten())
+            action = output.index(max(output))
+            if st.session_state.env.is_valid_location(action):
+                return action
+            else:
+                if random.random() < 0.05:
+                    action = random.randint(0,6)
+                    if st.session_state.env.is_valid_location(action):
+                        return action
 
 
 def handle_click(i,action):
@@ -349,7 +383,7 @@ def main():
                 enc[int(field)],
                 key=f"{i}-{j}",
                 on_click=handle_click
-                if st.session_state.player == 'Red'
+                if st.session_state.player == 'Blue'
                 or st.session_state.opponent == 'Human'
                 else computer_player(),
                 args=(i,j),
